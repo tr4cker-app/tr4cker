@@ -1,0 +1,12 @@
+{
+  "name": "Tr4cker",
+  "keywords": "tracker, tracking, locator, gps, location, wifi, geolocation, latitude, longitude, accuracy",
+  "description": "Tr4cker is a device tracker/locator which only use Wifi.",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/RobertSasak/tr4cker-esp8266.git"
+  },
+  "include": ["*.cpp", "*.h", "examples"],
+  "frameworks": "arduino",
+  "platforms": "atmelavr"
+}
