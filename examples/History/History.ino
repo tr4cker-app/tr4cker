@@ -1,6 +1,6 @@
 #import "Tr4cker.h"
 
-Tr4cker tr4cker("unwmteepojzqes7qvns3");
+Tr4cker tr4cker("put-your-device-key-here");
 
 void setup() {
     Serial.begin(115200);
