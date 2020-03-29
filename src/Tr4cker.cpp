@@ -202,7 +202,7 @@ void Tr4cker::begin()
             Serial.println("Could not connect to AP.");
         }
     }
-    if (success)
+    if (success && interval > 0)
     {
         Serial.println("Reading location history log file.");
         SPIFFS.begin();
@@ -213,19 +213,26 @@ void Tr4cker::begin()
         }
         else
         {
-            Serial.println(file.size());
+            int fileSize = file.size();
+            char domainWithTime[DOMAIN_NAME_SIZE];
+            int records = fileSize / (DOMAIN_NAME_SIZE + 1);
+            Serial.print("There are ");
+            Serial.print(records);
+            Serial.println(" location records that need to be send.");
             while (file.available())
             {
                 readLine(file, domain);
-                dnsLookup(domain);
+                sprintf(domainWithTime, "%04x%s", interval * records, domain);
+                dnsLookup(domainWithTime);
             }
+            file.close();
             SPIFFS.remove(RECORD_LOG_FILE);
         }
     }
     else
     {
         Serial.println("Failed to connect to any open network.");
-        if (isHistoryEnabled)
+        if (interval > 0)
         {
             SPIFFS.begin();
             File file = SPIFFS.open(RECORD_LOG_FILE, "a");
@@ -236,6 +243,7 @@ void Tr4cker::begin()
             else
             {
                 file.println(domain);
+                file.close();
                 Serial.println("Wrote location record to log file so it can be send on next successful connection.");
             }
         }
@@ -356,9 +364,9 @@ void Tr4cker::freeAPList()
     APlist.clear();
 }
 
-void Tr4cker::enableHistory(bool state)
+void Tr4cker::enableHistory(bool interval)
 {
-    isHistoryEnabled = state;
+    this->interval = interval;
 }
 
 void Tr4cker::readLine(File file, char *buffer)

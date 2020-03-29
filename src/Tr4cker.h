@@ -21,7 +21,7 @@
 #define MAX_CONNETING_TIME_TO_OPEN_AP 10
 #define MAX_CONNETING_TIME_TO_KNOWN_AP 25
 #define RECORD_LOG_FILE "tr4cker1.log"
-#define DOMAIN_NAME_SIZE 127
+#define DOMAIN_NAME_SIZE 123
 
 typedef struct
 {
@@ -48,7 +48,7 @@ public:
 private:
   char *_deviceKey;
   uint8_t _batteryPin = 0;
-  bool isHistoryEnabled = false;
+  int interval = 0;
   char *encryptionTypeToString(uint8_t authMode);
   uint8_t readBattery();
   void freeAPList();
