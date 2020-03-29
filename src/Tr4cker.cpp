@@ -121,7 +121,7 @@ void Tr4cker::begin()
     }
 
     uint8_t batteryLevel = readBattery();
-    char domain[127];
+    char domain[DOMAIN_NAME_SIZE];
     sprintf(domain, "%02x%02x%02x%02x%02x%02x%02x%02d%02x%02x%02x%02x%02x%02x%02d%02x%02x%02x%02x%02x%02x%02d.%02x%02x%02x%02x%02x%02x%02d%02x%02x%02x%02x%02x%02x%02d%02x%02x%02x%02x%02x%02x%02d%s.%s\0",
             batteryLevel,
             bssid[0][0], bssid[0][1], bssid[0][2], bssid[0][3], bssid[0][4], bssid[0][5], rssi[0],
@@ -168,7 +168,7 @@ void Tr4cker::begin()
             WiFi.BSSID(indices[i]),
             true);
 
-                while (keepTrying > 0)
+        while (keepTrying > 0)
         {
             if (WiFi.status() == WL_CONNECTED)
             {
@@ -191,19 +191,10 @@ void Tr4cker::begin()
             Serial.print("DNS:     ");
             Serial.println(WiFi.dnsIP());
 
-            IPAddress result;
-            int err = WiFi.hostByName(domain, result);
-            if (err == 1)
+            if (dnsLookup(domain))
             {
                 success = true;
-                Serial.print("DNS lookup successfull IP address: ");
-                Serial.println(result);
                 break;
-            }
-            else
-            {
-                Serial.print("DNS lookup failed with error code: ");
-                Serial.println(err);
             }
         }
         else
@@ -211,15 +202,48 @@ void Tr4cker::begin()
             Serial.println("Could not connect to AP.");
         }
     }
-    if (!success)
+    if (success)
+    {
+        Serial.println("Reading location history log file.");
+        SPIFFS.begin();
+        File file = SPIFFS.open(RECORD_LOG_FILE, "r");
+        if (!file)
+        {
+            Serial.println("Cannot open log file. No history locations.");
+        }
+        else
+        {
+            Serial.println(file.size());
+            while (file.available())
+            {
+                readLine(file, domain);
+                dnsLookup(domain);
+            }
+            SPIFFS.remove(RECORD_LOG_FILE);
+        }
+    }
+    else
     {
         Serial.println("Failed to connect to any open network.");
+        if (isHistoryEnabled)
+        {
+            SPIFFS.begin();
+            File file = SPIFFS.open(RECORD_LOG_FILE, "a");
+            if (!file)
+            {
+                Serial.println("Cannot open record log file.");
+            }
+            else
+            {
+                file.println(domain);
+                Serial.println("Wrote location record to log file so it can be send on next successful connection.");
+            }
+        }
     }
     Serial.println("");
     WiFi.mode(WIFI_OFF);
     WiFi.forceSleepBegin();
     delay(1);
-    // return tr.TR_SUCCESS;
 }
 
 char *Tr4cker::encryptionTypeToString(uint8_t authMode)
@@ -330,4 +354,32 @@ void Tr4cker::freeAPList()
         }
     }
     APlist.clear();
+}
+
+void Tr4cker::enableHistory(bool state)
+{
+    isHistoryEnabled = state;
+}
+
+void Tr4cker::readLine(File file, char *buffer)
+{
+    int l = file.readBytesUntil('\n', buffer, DOMAIN_NAME_SIZE);
+    buffer[l] = 0;
+}
+
+bool Tr4cker::dnsLookup(char *domain)
+{
+    IPAddress result;
+    int err = WiFi.hostByName(domain, result);
+    Serial.print("Performing DNS lookup for: ");
+    Serial.println(domain);
+    if (err == 1)
+    {
+        Serial.print("DNS lookup successfull IP address: ");
+        Serial.println(result);
+        return true;
+    }
+    Serial.print("DNS lookup failed with error code: ");
+    Serial.println(err);
+    return false;
 }
