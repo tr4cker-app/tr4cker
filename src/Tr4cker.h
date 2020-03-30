@@ -21,7 +21,7 @@
 #define MAX_CONNETING_TIME_TO_OPEN_AP 10
 #define MAX_CONNETING_TIME_TO_KNOWN_AP 25
 #define RECORD_LOG_FILE "tr4cker1.log"
-#define DOMAIN_NAME_SIZE 123
+#define DOMAIN_NAME_SIZE 127
 
 typedef struct
 {

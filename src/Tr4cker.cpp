@@ -215,15 +215,22 @@ void Tr4cker::begin()
         {
             int fileSize = file.size();
             char domainWithTime[DOMAIN_NAME_SIZE];
-            int records = fileSize / (DOMAIN_NAME_SIZE + 1);
+            int records = 1;
+            while (file.available())
+            {
+                readLine(file, domain);
+                records++;
+            }
             Serial.print("There are ");
             Serial.print(records);
             Serial.println(" location records that need to be send.");
+            file.seek(0);
             while (file.available())
             {
                 readLine(file, domain);
                 sprintf(domainWithTime, "%04x%s", interval * records, domain);
                 dnsLookup(domainWithTime);
+                records--;
             }
             file.close();
             SPIFFS.remove(RECORD_LOG_FILE);
