@@ -1,4 +1,4 @@
-# Tr4cker-esp8266
+# Tr4cker ESP8266
 
 Tracking position of any Wifi capable device.
 
@@ -55,4 +55,16 @@ Currently this repo support _ESP8266_ and _ESP32_. Feel free to open issue with 
 
 ```sh
 ./symlink.sh
+```
+
+Once done, simply call unsymlink to remove symlink.
+
+```sh
+./unsymlink.sh
+```
+
+## Publishing
+
+```sh
+npm publish
 ```
