@@ -9,7 +9,6 @@ void setup() {
 }
 
 void loop() {
-    tr4cker.setBatteryPin(A0);
     // We do not have access to real real date and time. 
     // So instead of storing actual time, tr4acker need to know how often do we perform location tracking. 
     // enableHistory takes integer representig measuring interval in minutes.
