@@ -7,6 +7,7 @@
 #define Tr4cker_h
 
 #include <vector>
+#include "FS.h"
 
 #if defined(ARDUINO) && ARDUINO >= 100
 #include "Arduino.h"
@@ -19,6 +20,8 @@
 #define DEVICE_KEY_LENGTH 20
 #define MAX_CONNETING_TIME_TO_OPEN_AP 10
 #define MAX_CONNETING_TIME_TO_KNOWN_AP 25
+#define RECORD_LOG_FILE "tr4cker1.log"
+#define DOMAIN_NAME_SIZE 127
 
 typedef struct
 {
@@ -38,17 +41,21 @@ public:
   Tr4cker(char *_deviceKey);
   ~Tr4cker();
   void setBatteryPin(uint8_t pin);
+  void enableHistory(bool state);
   bool addAP(const char *ssid, const char *passphrase);
   void begin();
 
 private:
   char *_deviceKey;
   uint8_t _batteryPin = 0;
+  int interval = 0;
   char *encryptionTypeToString(uint8_t authMode);
   uint8_t readBattery();
   void freeAPList();
   char *getPassphrase(String ssid);
   std::vector<WifiAPlist_t> APlist;
+  void readLine(File file, char *buffer);
+  bool dnsLookup(char *domain);
 };
 
 #endif
