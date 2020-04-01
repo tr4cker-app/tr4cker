@@ -2,9 +2,13 @@
 
 Tracking position of any Wifi capable device.
 
+<img width="697" alt="map" src="https://user-images.githubusercontent.com/281281/78156218-c6c7d200-743e-11ea-80fc-2c969a0e954f.png">
+
 ## Motivation
 
 This project combines two well know techniques into one solution that suprisingly works.
+
+
 
 ### MAC address geolocation
 
@@ -61,10 +65,4 @@ Once done, simply call unsymlink to remove symlink.
 
 ```sh
 ./unsymlink.sh
-```
-
-## Publishing
-
-```sh
-npm publish
 ```
