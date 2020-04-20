@@ -214,25 +214,32 @@ void Tr4cker::begin()
         else
         {
             int fileSize = file.size();
+            char domainFromFile[DOMAIN_NAME_SIZE];
             char domainWithTime[DOMAIN_NAME_SIZE];
-            int records = 1;
+            int records = 0;
             while (file.available())
             {
-                readLine(file, domain);
+                readLine(file, domainFromFile);
                 records++;
             }
             Serial.print("There are ");
             Serial.print(records);
             Serial.println(" location records that need to be send.");
             file.seek(0);
+            int successful = 0;
             while (file.available())
             {
-                readLine(file, domain);
-                sprintf(domainWithTime, "%04x%s", interval * records, domain);
-                dnsLookup(domainWithTime);
+                readLine(file, domainFromFile);
+                sprintf(domainWithTime, "%04x%s", interval * records, domainFromFile);
+                if (!dnsLookup(domainWithTime))
+                {
+                    break;
+                }
+                successful++;
                 records--;
             }
             file.close();
+            Serial.println("All location records send, removing log.");
             SPIFFS.remove(RECORD_LOG_FILE);
         }
     }
@@ -242,14 +249,28 @@ void Tr4cker::begin()
         if (interval > 0)
         {
             SPIFFS.begin();
-            File file = SPIFFS.open(RECORD_LOG_FILE, "a");
+            File file = SPIFFS.open(RECORD_LOG_FILE, "a+");
+
             if (!file)
             {
                 Serial.println("Cannot open record log file.");
             }
             else
             {
-                file.println(domain);
+                Serial.println("Records history:");
+                int records = 0;
+                char domainFromFile[DOMAIN_NAME_SIZE];
+                while (file.available())
+                {
+                    readLine(file, domainFromFile);
+                    Serial.println(domainFromFile);
+                    records++;
+                }
+                Serial.print("There are ");
+                Serial.print(records);
+                Serial.println(" location records that need to be send.");
+                file.print(domain);
+                file.print("\n");
                 file.close();
                 Serial.println("Wrote location record to log file so it can be send on next successful connection.");
             }
@@ -371,9 +392,9 @@ void Tr4cker::freeAPList()
     APlist.clear();
 }
 
-void Tr4cker::enableHistory(bool interval)
+void Tr4cker::enableHistory(int intervalInMinutes)
 {
-    this->interval = interval;
+    this->interval = intervalInMinutes;
 }
 
 void Tr4cker::readLine(File file, char *buffer)
@@ -385,9 +406,9 @@ void Tr4cker::readLine(File file, char *buffer)
 bool Tr4cker::dnsLookup(char *domain)
 {
     IPAddress result;
-    int err = WiFi.hostByName(domain, result);
     Serial.print("Performing DNS lookup for: ");
     Serial.println(domain);
+    int err = WiFi.hostByName(domain, result);
     if (err == 1)
     {
         Serial.print("DNS lookup successfull IP address: ");
