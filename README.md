@@ -1,4 +1,4 @@
-# Tr4cker ESP8266
+# Tr4cker ESP8266 [![Build Status](https://travis-ci.com/tr4cker-app/tr4cker.svg?branch=master)](https://travis-ci.com/tr4cker-app/tr4cker)
 
 Tracking position of any Wifi capable device.
 
