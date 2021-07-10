@@ -41,7 +41,7 @@ public:
   Tr4cker(char *_deviceKey);
   ~Tr4cker();
   void setBatteryPin(uint8_t pin);
-  void enableHistory(bool state);
+  void enableHistory(int intervalInMinutes);
   bool addAP(const char *ssid, const char *passphrase);
   void begin();
 
